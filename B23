@@ -1,0 +1,64 @@
+.data
+    frase: .string "Esto es una fase de prueba"
+    palabra1: .string ""
+    palabra2: .string "no"
+    
+.text
+la a3, frase
+la a4, palabra1
+jal ra, strstr
+li a7, 1
+ecall
+li a7, 10
+ecall
+
+#strstr({a3, a4} -> a0)
+# a0: Resultado de la operacion, retorna 1 si fue exitosa
+#     y 0 sino lo fue
+
+#a3: Cadena de base
+#a4: Cadena a evaluar en base
+
+#t0: Direccion temporaria de base
+#t1: Direccion temporaria de la subcadena
+#t2: Valor temporario de *base
+#t3: Valor temporario de *subcadena
+
+#La funcion itera sobre la cadena base, si en algun momento
+#un caracter de la cadena base coincide con el primer caracter 
+#de la subcadena, se entra a un ciclo interior, si resulta que
+#todos los caracteres de la subcadena coinciden con los evaluados
+#la funcion retorna 1. Si en cambio, la funcion alcanza el final
+#de la cadena base retorna 0
+
+strstr:
+    mv t0, a3
+    mv t1, a4
+    lbu t2, 0(t0)
+    beq t2, zero, _Fallo
+    _While:
+        lbu t3, 0(t1)
+        bne t2, t3, _FinCicloInterior
+        _CicloInterior:
+            addi t0, t0, 1
+            addi t1, t1, 1
+            lbu t2, 0(t0)
+            lbu t3, 0(t1)
+            beq t2, t3, _CicloInterior
+            addi t0, t0, -1
+            lbu t2, 0(t0)
+            addi t1, t1, -1
+            lbu t3, 0(t1)
+            beq t2, t3, _Exito
+        _FinCicloInterior:
+            mv t1, a4
+            addi t0, t0, 2
+            lbu t2, 0(t0)
+            bne t2, zero, _While
+    _Fallo:
+        li a0, 0
+        ret
+    
+    _Exito:
+        li a0, 1
+        ret
