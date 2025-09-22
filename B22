@@ -1,0 +1,50 @@
+.data
+    cadena1: .string "Hola Mundo!"
+    cadena2: .string "Hello, World!"
+    cadena3: .string "Hola Mundo!"
+    cadena4: .string "Hola Mundo! mas largo"
+
+.text
+la a4, cadena1
+la a5, cadena3
+jal strcmp
+li a7, 1
+ecall
+li a7, 10
+ecall
+
+
+
+
+#strcmp({a4, a5} -> a0)
+#a4: Null ended string "A"
+#a5: Null ended string "B"
+#a0: Value of the lexicographical comparison between "A" and "B"
+
+#t0: Temporary address of string "A"
+#t1: Temporary address of string "B"
+#t2: Temporary variable for *A
+#t3: Temporary variable for *B
+#t4: Temporary variable for *A - *B
+
+strcmp:
+    mv t0, a4
+    mv t1, a5
+    lbu t2, 0(t0)
+    lbu t3, 0(t1)
+    sub t4, t2, t3
+    bne t4, zero, _guard
+    beq t2, zero, _guard
+    beq t3, zero, _guard
+    _while:
+        addi t0, t0, 1
+        addi t1, t1, 1
+        lbu t2, 0(t0)
+        lbu t3, 0(t1)
+        sub t4, t2, t3
+        beq t2, zero, _guard
+        beq t3, zero, _guard
+        beq t4, zero, _while
+    _guard:
+        mv a0, t4
+        ret
