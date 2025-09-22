@@ -1,0 +1,64 @@
+.data
+    string: .string "YVAN EHT NIOJ"
+    
+.text
+    la a0, string
+    jal ra, strrev
+    li a7, 4
+    ecall
+    li a7, 10
+    ecall
+
+
+#strlen(a0 -> a1)
+# a0: Address of null-ended string
+# a1: Amount of character in the string
+
+#t0: Current lenght of string
+#t1 Temporary variable for *string
+
+strlen:
+    mv t0, a0
+    li a1, 0
+    lbu t1, 0(t0)
+    beq t1, zero, _guard
+    _while:
+        addi a1, a1, 1
+        addi t0, t0, 1
+        lbu t1, 0(t0)
+        bne t1, x0, _while
+    _guard:
+        ret
+    
+#strrev(a0 -> a0)
+# a0: address of string to reverse 
+
+#t0: Temporary variable
+#t3: Temporary variable
+#t1: Address at start of string
+#t2: Address at end of string
+
+strrev:
+    addi sp, sp, -4 #push ra
+    sw ra, 0(sp)
+    jal ra, strlen #call strlen
+    mv t0, a1
+    addi t0, t0, -1
+    mv t1, a0
+    mv t2, t1
+    add t2, t2, t0 #load the variables
+    bge t1, t2, _guard2 #guard clause
+    _while2:
+        lbu t0, 0(t1) #t0 = *t1
+        lbu t3, 0(t2) #t3 = *t2
+        sb t3, 0(t1) # *t1 = t3
+        sb t0, 0(t2) # *t2 = t0
+        addi t1, t1, 1 #t1++
+        addi t2, t2, -1 #t2--
+        blt t1, t2, _while2 #t1 < t2 ? _while2 : pc++
+    _guard2:
+        lw t0, 0(sp)
+        addi sp, sp, 4
+        mv ra, t0
+        ret
+  
