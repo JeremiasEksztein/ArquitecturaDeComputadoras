@@ -1,0 +1,34 @@
+.data
+    char: .string "a"
+    
+.text
+    la a0, char
+    lbu a0, 0(a0)
+    jal ra, toLower
+    li a7, 11
+    ecall
+    li a7, 10
+    ecall
+    
+    
+    
+#toLower(a0 -> a0)
+#a0: Registro con el caracter a evaluar
+#    Retorna a0 si esta en minuscula, o
+#    a0 += 32 sino lo esta. De no ser
+#    un caracter alfanumerico escapa de la funcion
+    
+    
+toLower:
+    mv t0, a0
+    addi t0, t0, -65
+    li t1, 25
+    blt t0, zero, _Fallo
+    blt t1, t0, _Fallo
+    addi t0, t0, 97
+    mv a0, t0
+    ret
+    _Fallo:
+        ret
+    
+    
