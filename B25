@@ -1,0 +1,110 @@
+.data
+    texto1: .string "UnA"
+    texto2: .string "una"
+    
+.text
+    la a4, texto1
+    la a5, texto2
+    jal ra, strcmpi
+    li a7, 1
+    ecall
+    li a7, 10
+    ecall
+    
+    
+#toLower(a0 -> a0)
+#a0: Register with the character to evaluate
+
+#t0: Temporary variable for character in a0
+#t1: Temporary variable for amount of alphabetic characters
+
+#    Returns a0 if character is lower-case, or
+#    a0 += 32 if it isn't. If a0 isn't an
+#    alphabetic character escapes the function
+    
+toLower:
+    mv t0, a0
+    addi t0, t0, -65
+    li t1, 25 
+    blt t0, zero, _Fallo01
+    blt t1, t0, _Fallo01
+    addi t0, t0, 97
+    mv a0, t0
+    ret
+    _Fallo01:
+        ret
+        
+#strcmpi({a4, a5} -> a0)
+#a4: Null ended string "A"
+#a5: Null ended string "B"
+#a0: Value of the lexicographical comparison between "A" and "B"
+
+#t0: Temporary address of string "A"
+#t1: Temporary address of string "B"
+#t2: Temporary variable for *A
+#t3: Temporary variable for *B
+#t4: Temporary variable for *A - *B
+
+#    Alphabetic characters are turned into the their lower case form before
+#    comparison
+
+strcmpi:
+    mv t0, a4
+    mv t1, a5
+    lbu t2, 0(t0)
+    lbu t3, 0(t1)
+
+    sw ra, 0(sp)
+    addi sp, sp, -4 #push ra into stack
+    
+    sw t0, 0(sp)    #push t0 and t1 to the stack
+    addi sp, sp, -4
+    sw t1, 0(sp)
+    addi sp, sp, -4
+    
+    mv a0, t2       #compute the tolower()'s
+    jal ra, toLower
+    mv t2, a0
+    
+    mv a0, t3
+    jal ra, toLower
+    mv t3, a0
+    
+    sub t4, t2, t3  #Guard clause
+    bne t4, zero, _guard
+    beq t2, zero, _guard
+    beq t3, zero, _guard
+    _while:
+        addi sp, sp, 4 #pop t0 and t1 from the stack
+        lw t0, 0(sp)
+        addi sp, sp, 4
+        lw t1, 0(sp)
+        
+        addi t0, t0, 1 #Load the characters from memory
+        addi t1, t1, 1
+        lbu t2, 0(t0)
+        lbu t3, 0(t1)
+        
+        sw t0, 0(sp)   #push t0 and t1 into the stack
+        addi sp, sp, -4
+        sw t1, 0(sp)
+        addi sp, sp, -4
+
+        mv a0, t2
+        jal ra, toLower
+        mv t2, a0
+            
+        mv a0, t3
+        jal ra, toLower
+        mv t3, a0
+        
+        sub t4, t2, t3
+        beq t2, zero, _guard
+        beq t3, zero, _guard
+        beq t4, zero, _while
+    _guard:
+        mv a0, t4
+        addi sp, sp, 12 #pop ra from stack
+        lw ra, 0(sp)
+        ret
+    
