@@ -1,0 +1,119 @@
+.data
+    numero1: .string "25"
+    numero2: .string "633"
+    
+.text
+    la a1, numero1
+    jal ra, atoi
+    li a7, 1
+    ecall
+    li a7, 11
+    li a0, 10
+    ecall
+    la a1, numero2
+    jal ra, atoi
+    li a7, 1
+    ecall
+    li a7, 10
+    ecall
+
+#strlen(a0 -> a1)
+# a0: Address of null-ended string
+# a1: Amount of character in the string
+
+#t0: Current lenght of string
+#t1 Temporary variable for *string
+
+strlen:
+    mv t4, a0
+    li a1, 0
+    lbu t5, 0(t4)
+    beq t5, zero, _guard
+    _while:
+        addi a1, a1, 1
+        addi t4, t4, 1
+        lbu t5, 0(t4)
+        bne t5, zero, _while
+    _guard:
+        ret
+        
+#atoi (a1 -> a0)
+#a1:
+#a0:
+    
+#t0: Temporary address for string a1
+#t1: Temporary variable for char from a1
+#t2: Sentinel value, strlen(a1)
+    
+atoi:
+    mv t0, a1
+    
+    sw ra, 0(sp)
+    addi sp, sp, -4
+    
+    mv a0, t0
+    jal ra, strlen
+    mv t2, a1
+    addi a1, a1, -1
+    add t0, t0, a1
+    
+    addi sp, sp, 4
+    lw ra, 0(sp)
+    
+    li a0, 0
+    
+    beq t2, zero, _FinAtoi
+
+#PrimerDigitoAtoi
+    
+    lbu t1, 0(t0)
+    addi t1, t1, -48
+    beq t1, zero, _SegDigitoAtoi
+    add a0, a0, t1
+    addi t2, t2, -1
+    
+    beq t2, zero, _FinAtoi
+    
+    _SegDigitoAtoi:
+    addi t0, t0, -1
+    lbu t1, 0(t0)
+    addi t1, t1, -48
+    beq t1, zero, _TerDigitoAtoi
+    slli t1, t1, 3
+    add a0, a0, t1
+    srli t1, t1, 2
+    add a0, a0, t1
+    addi t2, t2, -1
+    
+    beq t2, zero, _FinAtoi
+    
+    _TerDigitoAtoi:
+    addi t0, t0, -1
+    lbu t1, 0(t0)
+    addi t1, t1, -48
+    beq t1, zero, _CuarDigitoAtoi
+    slli t1, t1, 6
+    add a0, a0, t1
+    srli t1, t1, 1
+    add a0, a0, t1
+    srli t1, t1, 3
+    add a0, a0, t1
+    addi t2, t2, -1
+    
+    beq t2, zero, _FinAtoi
+    
+    _CuarDigitoAtoi:
+    addi t0, t0, -1
+    lbu t1, 0(t0)
+    addi t1, t1, -48
+    beq t1, zero, _FinAtoi
+    slli t1, t1, 10
+    add a0, a0, t1
+    srli t1, t1, 6
+    sub a0, a0, t1
+    srli t1, t1, 1
+    sub a0, a0, t1
+    
+    _FinAtoi:
+    ret
+ 
