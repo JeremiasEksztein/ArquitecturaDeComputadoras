@@ -1,0 +1,100 @@
+.data
+    vector: .word 100, -10, 20, 1000, 66500, 1000000, -21, 34, 56
+    finvector:
+    
+.text
+    la a1, vector
+    la a2, finvector
+    jal ra, printVector
+    li a7, 11
+    li a0, 10
+    ecall
+    la a3, vector
+    la a4, finvector
+    jal ra, bubbleSort
+    la a1, vector
+    la a2, finvector
+    jal ra, printVector
+    li a7, 10
+    ecall
+    
+_ExcepcionMismaDireccion:
+    li a7, 93
+    li a0, 1
+    ecall
+    
+    
+swap:
+    beq a3, a4, _ExcepcionMismaDireccion
+    mv t0, a3
+    mv t1, a4
+    lw t0, 0(t0)
+    lw t1, 0(t1)
+    xor t0, t1, t0
+    xor t1, t0, t1
+    xor t0, t1, t0
+    sw t0, 0(a3)
+    sw t1, 0(a4)
+    ret
+    
+bubbleSort:
+    beq a3, a4, _ExcepcionMismaDireccion
+    sw ra, 0(sp)
+    addi sp, sp, -4
+    sub t6, a4, a3
+    srli t6, t6, 2
+    _CicloBubbleSort:
+        addi t6, t6, -1
+        la a3, vector
+        la a4, finvector
+        jal ra, pushMax
+        blt zero, t6, _CicloBubbleSort
+        addi sp, sp, 4
+        lw ra, 0(sp)
+        ret 
+        
+    
+pushMax:
+    beq a3, a4, _ExcepcionMismaDireccion
+    
+    sw ra, 0(sp)
+    addi sp, sp, -4
+    
+    mv t4, a3
+    mv t5, a4
+    addi t5, t5, -4
+    _CicloPushMax:
+        lw t2, 0(t4)
+        lw t3, 4(t4)
+        blt t2, t3, _CicloClause
+        
+        mv a3, t4
+        addi a4, t4, 4
+        jal ra, swap
+        
+        _CicloClause:
+        addi t4, t4, 4
+        blt t4, t5, _CicloPushMax
+        
+        addi sp, sp, 4
+        lw ra, 0(sp)
+        ret
+        
+    
+printVector:
+    beq a1, a2, _ExcepcionMismaDireccion
+    mv t0, a1
+    mv t1, a2
+    _CicloPrintVector:
+        li a7, 11
+        li a0, 124
+        ecall
+        li a7, 1
+        lw a0, 0(t0)
+        ecall
+        addi t0, t0, 4
+        bne t0, t1, _CicloPrintVector
+        li a7, 11
+        li a0, 10
+        ecall
+        ret
