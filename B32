@@ -1,0 +1,19 @@
+.text
+    li a0, -22
+    jal ra, div8
+    li a7, 1
+    ecall
+    li a7, 10
+    ecall
+    
+div8:
+    blt a0, zero, _NegDiv
+    srai a0, a0, 3
+    ret
+    _NegDiv:
+    mv t0, a0
+    sub a0, a0, a0
+    sub a0, a0, t0 
+    srai a0, a0, 3
+    sub a0, zero, a0
+    ret
