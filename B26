@@ -1,0 +1,113 @@
+.data
+    frase: .string "Esto es una fase de prueba"
+    palabra1: .string "no"
+    palabra2: .string "no"
+    
+.text
+la a3, frase
+la a4, palabra1
+jal ra, strstri
+li a7, 1
+ecall
+li a7, 10
+ecall
+
+#toLower(a0 -> a0)
+#a0: Registro con el caracter a evaluar
+#    Retorna a0 si esta en minuscula, o
+#    a0 += 32 sino lo esta. De no ser
+#    un caracter alfanumerico escapa de la funcion
+    
+toLower:
+    mv t0, a0
+    addi t0, t0, -65
+    li t1, 25
+    blt t0, zero, _Fallo01
+    blt t1, t0, _Fallo01
+    addi t0, t0, 97
+    mv a0, t0
+    ret
+    _Fallo01:
+        ret
+    
+
+#strstr({a3, a4} -> a0)
+# a0: Resultado de la operacion, retorna 1 si fue exitosa
+#     y 0 sino lo fue
+
+#a3: Cadena de base
+#a4: Cadena a evaluar en base
+
+#t0: Direccion temporaria de base
+#t1: Direccion temporaria de la subcadena
+#t2: Valor temporario de *base
+#t3: Valor temporario de *subcadena
+
+#La funcion itera sobre la cadena base, si en algun momento
+#un caracter de la cadena base coincide con el primer caracter 
+#de la subcadena, se entra a un ciclo interior, si resulta que
+#todos los caracteres de la subcadena coinciden con los evaluados
+#la funcion retorna 1. Si en cambio, la funcion alcanza el final
+#de la cadena base retorna 0
+
+strstri:
+    mv t4, a3
+    mv t5, a4
+    
+    sw ra, 0(sp)
+    addi sp, sp, -4
+    
+    lbu t2, 0(t4)
+    
+    mv a0, t2
+    jal ra, toLower
+    mv t2, a0
+    
+    beq t2, zero, _Fallo
+    _While:
+        lbu t3, 0(t5)
+        
+        mv a0, t3
+        jal ra, toLower
+        mv t3, a0
+        
+        bne t2, t3, _FinCicloInterior
+        _CicloInterior:
+            addi t4, t4, 1
+            addi t5, t5, 1
+            lbu t2, 0(t4)
+            
+            mv a0, t2
+            jal ra, toLower
+            mv t2, a0
+            
+            lbu t3, 0(t5)
+            
+            mv a0, t3
+            jal ra, toLower
+            mv t3, a0
+            
+            beq t2, t3, _CicloInterior
+            beq t3, zero, _Exito
+        _FinCicloInterior:
+            mv t5, a4
+            addi t4, t4, 1
+            lbu t2, 0(t4)
+            
+            mv a0, t2
+            jal ra, toLower
+            mv t2, a0
+            
+            bne t2, zero, _While
+            
+    _Fallo:
+        li a0, 0
+        addi sp, sp, 4
+        lw ra, 0(sp)
+        ret
+    
+    _Exito:
+        li a0, 1
+        addi sp, sp, 4
+        lw ra, 0(sp)
+        ret
