@@ -1,0 +1,54 @@
+.text
+    li a1, 1245
+    li a2, 223
+    jal ra, divide
+    li a7, 1
+    ecall
+    li a7, 10
+    ecall
+    
+divide:
+    li a0, 0
+    blt a1, zero, _Exception
+    blt a2, zero, _Exception
+    ori t0, a2, 0x0
+    beq t0, zero, _Exception
+    ori t0, a1, 0x0
+    beq t0, zero, _ZeroDiv
+    blt a1, a2, _ZeroDiv
+    _CicloDiv:
+        addi a0, a0, 1
+        sub a1, a1, a2
+        blt a2, a1, _CicloDiv
+        ret
+
+    _Exception:
+        li a7, 93
+        li a0, 1
+        ecall
+    
+    _ZeroDiv:
+         ret
+    
+
+mult:
+    li a0, 0
+    blt a1, zero, _Exception
+    blt a2, zero, _Exception
+    and t0, a1, a2
+    beq t0, zero, _ZeroMult
+    blt a2, a1, _Aux01
+    mv t0, a1
+    mv a1, a2
+    j _Ciclo
+    _Aux01:
+    mv t0, a2    
+    _Ciclo:
+        add a0, a0, a1
+        addi t0, t0, -1
+        bne t0, zero, _Ciclo
+    ret
+    _ZeroMult:
+        li a0, 0
+        ret
+    
