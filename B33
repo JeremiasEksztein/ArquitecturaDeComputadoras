@@ -1,0 +1,55 @@
+.data
+    vector: .word 100, -222, 20, 1000, 66500, 1000000, -21, 34, 56
+    finvector:
+    
+.text
+    la a1, vector
+    la a2, finvector
+    jal ra, buscaMin
+    li a7, 1
+    ecall
+    li a7, 10
+    ecall
+    
+buscaMax:
+    beq a1, a2, _ExceptionVectorNulo
+    mv t0, a1
+    mv t1, a2
+    lw t2, 0(t0)
+    mv t3, t2
+    _CicloMax:
+        addi t0, t0, 4
+        lw t2, 0(t0)
+        blt t3, t2, _AsignarSentinelaMax
+        _CondMax:
+        bne t0, t1, _CicloMax
+        mv a0, t3
+        ret
+        
+        _AsignarSentinelaMax:
+        mv t3, t2
+        j _CondMax
+   
+_ExceptionVectorNulo:
+    li a0, 0
+    ret
+    
+buscaMin:
+    beq a1, a2, _ExceptionVectorNulo
+    mv t0, a1
+    mv t1, a2
+    lw t2, 0(t0)
+    mv t3, t2
+    _CicloMin:
+        addi t0, t0, 4
+        lw t2, 0(t0)
+        blt t2, t3, _AsignarSentinelaMin
+        _CondMin:
+        bne t0, t1, _CicloMin
+        mv a0, t3
+        ret
+        
+        _AsignarSentinelaMin:
+        mv t3, t2
+        j _CondMin
+        
