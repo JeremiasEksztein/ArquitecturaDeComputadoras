@@ -1,0 +1,35 @@
+.text
+    jal ra, proceso
+    li a7, 10
+    ecall
+    
+    
+proceso:
+    li t0, 0x41424344 #ABCD
+    li t1, 0x04040404 #+4
+    li t2, 0x12345678 #Comienzo
+    li t3, 0x12345690 #t2 + 25
+    li t4, 0x01010101 #+1
+    _CicloProceso:
+        sw t0, 0(t2)
+        add t0, t0, t1
+        addi t2, t2, 4
+        blt t2, t3, _CicloProceso
+        li t5, 89
+        sb t5, 0(t2)
+        j _Lectura
+        
+_Lectura:
+    addi t2, t2, -24
+    _CicloProceso2:
+        lw t0, 0(t2)
+        add t0, t0, t4
+        sw t0, 0(t2)
+        addi t2, t2, 4
+        blt t2, t3, _CicloProceso2
+        li t5, 90
+        sb t5, 0(t2)
+        ret
+        
+    
+        
