@@ -1,0 +1,130 @@
+.data
+    vector: .half -1, -40, 2, 92, 40, -92, -6502, 80, 1, -92, 3, 13, -15, -92, 40, 34, 92
+    finvector:
+        
+.text
+    la a0, vector
+    la a1, finvector
+    jal ra, puntoA
+    jal ra, putint
+    jal ra, puntoB
+    jal ra, puntoC
+    jal ra, puntoB
+fin:
+    li a7, 10
+    ecall
+ 
+MismaDireccion:
+    li a7, 93
+    li a0, 1
+    ecall
+    
+putint:
+    li a7, 1
+    sw a0, 0(sp)
+    mv a0, a3
+    ecall
+    li a7, 11
+    li a0, 10
+    ecall
+    lw a0, 0(sp)
+    ret
+    
+#puntoA
+#parametros: a0 = Comienzo del vector, a1 = final del vector
+#salidas: a3 = ultimo valor negativo del vector    
+puntoA:
+    beq a0, a1, MismaDireccion
+    mv t0, a0
+    mv t1, a1
+    puntoA_Ciclo:
+        lh t2, 0(t0)
+        blt t2, zero, puntoA_SiNegativo
+        puntoA_C0:
+        addi t0, t0, 2
+        blt t0, t1, puntoA_Ciclo
+        ret
+        
+    puntoA_SiNegativo:
+        mv a3, t2
+        j puntoA_C0
+    
+#puntoB
+#parametros: a0 = comienzo del vector; a1 = final del vector; a3 = elemento (Abs) a remarcar
+#salidas: Imprime por consola el vector al reves, remarcando los elementos iguales a a3 con <>
+puntoB:
+    beq a0, a1, MismaDireccion
+    blt a3, zero, puntoB_Negar0
+    
+    sw a0, 0(sp)
+    puntoB_L0:
+
+    mv t0, a0
+    mv t1, a1
+    addi t1, t1, -2
+    puntoB_Ciclo:
+        lh t2, 0(t1)
+        mv t3, t2
+        blt t2, zero, puntoB_Negar1
+        puntoB_Ciclo0:
+        beq a3, t2, puntoB_SiIguales
+        mv a0, t3
+        ecall
+        puntoB_Ciclo1:
+        addi t1, t1, -2
+        bge t1, t0, puntoB_Ciclo
+        lw a0, 0(sp)
+        ret 
+        
+    puntoB_Negar0:
+        neg a3, a3
+        j puntoB_L0
+    puntoB_Negar1:
+        neg t2, t2
+        j puntoB_Ciclo0
+    
+    puntoB_SiIguales:
+        li a7, 11
+        li a0, 60
+        ecall
+        li a7, 1
+        mv a0, t3
+        ecall
+        li a7, 11
+        li a0, 62
+        ecall
+        li a7, 1
+        j puntoB_Ciclo1
+
+#puntoC
+#parametros: a0 = Comienzo del vector, a1 = Fin del vector
+#salidas: (*a0) += (*a0) < 0 ? -1 : (*a0) % 2 != 0 ? 1 : 0
+puntoC:
+    beq a0, a1, MismaDireccion
+    mv t0, a0
+    mv t1, a1
+    puntoC_Ciclo:
+        lh t2, 0(t0)
+        mv t3, t2
+        blt t2, zero, puntoC_SiNegativo
+        andi t2, t2, 0x01
+        addi t2, t2, -1
+        beq t2, zero, puntoC_SiImpar
+        puntoC_Ciclo0:
+        addi t0, t0, 2
+        blt t0, t1, puntoC_Ciclo
+        ret
+        
+    puntoC_SiNegativo:
+        addi t3, t3, -1
+        sh t3, 0(t0)
+        j puntoC_Ciclo0
+        
+    puntoC_SiImpar:
+        addi t3, t3, 1
+        sh t3, 0(t0)
+        j puntoC_Ciclo0
+        
+    
+        
+    
