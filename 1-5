@@ -1,0 +1,149 @@
+.data
+    vector: .byte 0x01, 0x10, 0x02, 0xff, 0x33, 0x90, 0x55
+    finvector:
+    vector2: .word 1, 20, 44, 2, 2306, 258, 259, 14594
+    finvector2:
+    vector3: .word 3, 4, 100, -20, 50, 100, 100, -30, 20, 100, 50, 4, -30, 3, 100
+    finvector3:
+    
+
+.text
+    la a3, vector3
+    la a4, finvector3
+    li t0, 3
+    jal ra, contarNumeroEj6
+    mv a0, a5
+    li a7, 1
+    ecall
+    li a7, 10
+    ecall
+    
+mostrarPares:
+    beq a3, a4, _Fin1
+    li a7, 34
+    mv t0, a3
+    mv t1, a4
+    _Ciclo1:
+         lbu a0, 0(t0)
+         mv t3, a0
+         andi t3, t3, 0x01
+         andi t4, t0, 0x01
+         add t3, t3, t4
+         beq t3, zero, _printPar
+         j _loopUpdate1 
+         
+     _printPar:
+         ecall
+         
+     _loopUpdate1:
+         addi t0, t0, 1
+         blt t0, t1, _Ciclo1
+     
+     _Fin1:
+         ret
+         
+complementarVector:
+    beq a3, a4, _Fin2
+    mv t0, a3
+    mv t1, a4
+    _Ciclo2:
+        lbu t2, 0(t0)
+        neg t2, t2
+        sb t2, 0(t0)
+        addi t0, t0, 1
+        blt t0, t1, _Ciclo2
+    
+    _Fin2:
+        ret
+        
+newline:
+    li a7, 11
+    li a0, 10
+    ecall
+    ret
+
+printVector:
+    beq a3, a4, _Fin3
+    mv t0, a3
+    mv t1, a4
+    _Ciclo3:
+        li a7, 11
+        li a0, 91
+        ecall
+        li a7, 34
+        lbu t2, 0(t0)
+        mv a0, t2
+        ecall
+        li a7, 11
+        li a0, 93
+        ecall
+        addi t0, t0, 1
+        blt t0, t1, _Ciclo3
+        
+    _Fin3:
+        ret
+        
+#Guarda el resultado en a5
+mostrarNumeros10:
+    beq a3, a4, _Fin4
+    li a5, 0
+    mv t0, a3
+    mv t1, a4
+    li t4, 0x02
+    _Ciclo4:
+        lw t3, 0(t0)
+        andi t3, t3, 0x03
+        beq t3, t4, _Contar1
+        _loopUpdate2:
+        addi t0, t0 4
+        blt t0, t1, _Ciclo4
+        j _Fin4
+        
+    _Contar1:
+        addi a5, a5, 1
+        j _loopUpdate2
+    
+    _Fin4:
+        ret
+    
+        
+buscarMin:
+    beq a3, a4, _Fin5
+    mv t0, a3
+    mv t1, a4
+    lw a5, 0(t0) #Cargamos el min = vec[0]
+    addi t0, t0, 4
+    _Ciclo5:
+        lw t3, 0(t0)
+        blt t3, a5, _ActualizarMin
+        _loopUpdate3:
+        addi t0, t0, 4
+        blt t0, t1, _Ciclo5
+        j _Fin5
+        
+    _ActualizarMin:
+        mv a5, t3
+        j _loopUpdate3
+            
+    _Fin5:
+        ret
+        
+contarNumeroEj6:
+    beq a3, a4, _Fin6
+    mv t1, a3
+    mv t2, a4
+    li a5, 0
+    _Ciclo6:
+        lw t3, 0(t1)
+        beq t3, t0, _Contar2
+        _loopUpdate4:
+        addi t1, t1, 4
+        blt t1, t2, _Ciclo6
+        j _Fin6
+        
+    _Contar2:
+        addi a5, a5, 1
+        j _loopUpdate4
+    
+    _Fin6:
+        ret
