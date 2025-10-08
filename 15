@@ -1,0 +1,43 @@
+.data
+    info: .word 0xff000000, 0x000000ff, 0x00ff0000
+    info2: .word 0x0000ff00, 0x00ff0000
+    info3: .word 0x00ff0000, 0x00ff0000
+    info4: .word 0x000000ff, 0x0000ff00
+    info5: .word 0x00ff0000, 0x00ff0000
+    info6: .word 0x0000ff00, 0xff000000 
+    info7: .word 0x000000ff
+    fininfo:
+    palabras_por_linea: .word 2
+    
+.text
+    la a0, info
+    la a1, fininfo
+    la a2, palabras_por_linea
+    lw a2, 0(a2)
+    jal ra, imprimirMatriz
+    fin:
+    li a7, 10
+    ecall
+    
+imprimirMatriz:
+    beq a0, a1, fin
+    blt a2, zero, fin
+    mv t0, a0
+    mv t1, a1
+    mv t2, a2
+    _CicloI:
+        li a7, 35
+        li t3, 0
+        _CicloJ:
+            lw a0, 0(t0)
+            ecall
+            addi t3, t3, 1
+            addi t0, t0, 4
+            blt t3, t2, _CicloJ
+        li a7, 11
+        li a0, 10
+        ecall
+        blt t0, t1, _CicloI
+        ret    
+    #return
+        
