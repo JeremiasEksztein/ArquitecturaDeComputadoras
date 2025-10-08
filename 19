@@ -1,0 +1,42 @@
+.data
+    numeros: .byte 4, 7, 23, 14, 24, 35, 12
+    fnumeros:
+        
+.text
+    la a0, numeros
+    la a1, fnumeros
+    jal ra, impares
+    fin:
+    li a7, 10
+    ecall
+    
+impares:
+    #while(t0 < t1)
+    ##if(*t0 % 2 != 0)
+    ###print(t0)
+    ##t0++
+    
+    beq a0, a1, fin
+    mv t0, a0
+    mv t1, a1
+    li a7, 99
+    li t6, 99
+    _cicloImpares:
+        lb t2, 0(t0)
+        andi t3, t2, 0x01
+        bne t3, zero, _printImpar
+        _L0:
+        addi t0, t0, 1
+        blt t0, t1, _cicloImpares
+        ret
+        
+    _printImpar:
+        beq a7, t6, _primerNum
+        li a7, 11
+        li a0, 45
+        ecall
+        _primerNum:
+        li a7, 1
+        mv a0, t2
+        ecall
+        j _L0
