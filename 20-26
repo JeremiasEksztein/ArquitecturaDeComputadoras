@@ -1,0 +1,344 @@
+.data
+    cadena1: .string "Esta es la cadena 1"
+    cadena2: .string "y esta es la cadena 2"
+    cadenaf:
+.bss
+    HEAP_START:
+    
+    
+.text
+    la a0, cadena1
+    la a1, cadena2
+    la a2, cadenaf
+    jal ra, strcat
+    la a0, cadenaf
+    jal ra, puts
+    fin:
+    li a7, 10
+    ecall
+
+#strlen(a0: str)
+strlen:
+    #a0 = 0
+    #while(*t0 != 0)
+    ##a0++
+    ##t0++
+    #ret a0
+    
+    mv t0, a0
+    li a0, 0
+    _cicloStrlen:
+        lbu t1, 0(t0)
+        addi a0, a0, 1
+        addi t0, t0, 1
+        bne t1, zero, _cicloStrlen
+        ret
+
+#strcpy(a0: dest, a1: src)
+strcpy:
+    #while(*t1 != 0)
+    ##*t0 = *t1
+    ##t0++
+    ##t1++
+    
+    mv t0, a0
+    mv t1, a1
+    _cicloStrcpy:
+        lbu t2, 0(t1)
+        sb t2, 0(t0)
+        addi t1, t1, 1
+        addi t0, t0, 1
+        bne t2, zero, _cicloStrcpy
+        ret
+    
+#strcat(a2: dest, a0:lhs, a1:rhs)
+strcat: 
+    #strcpy(HEAP_START, a0)
+    #strcpy(HEAP_START + strlen(a0), a1)
+    #strcpy(a2, HEAP_START)
+    #ret 
+    
+    sw ra, 0(sp)
+    addi sp, sp, -4
+    
+    mv s0, a0
+    mv s1, a1
+    mv s2, a2
+    la s3, HEAP_START
+    
+    mv a0, s3
+    mv a1, s0
+    jal ra, strcpy
+    
+    mv a0, s3
+    jal ra, strlen
+    
+    add a0, s3, a0
+    addi a0, a0, -1
+    mv a1, s1
+    jal ra, strcpy
+    
+    mv a0, s2
+    mv a1, s3
+    jal ra, strcpy
+    
+    addi sp, sp, 4
+    lw ra, 0(sp)
+    
+    ret
+
+#puts(a0: str)
+puts:
+    li a7, 4
+    ecall
+    ret
+    
+
+
+*******************************************************************************
+
+.data
+    datos: .half 4, 8, 2, 26, 3, 5, 7, 8, 9, 11
+    red: .word 0, 0, 0, 0, 0
+    cant: .byte 5
+    
+.text
+    la a0, datos
+    la a1, red
+    jal ra, reduccion
+    la a2, cant
+    lb a2, 0(a2)
+    jal imprimirVector
+    fin:
+    li a7, 10
+    ecall
+    
+reduccion:
+    
+    # t0 = a0
+    # t1 = a1 - 1
+    # t2 = a1
+    
+    #while(t0 != t1)
+    ##*t2 [word] = *t0 [half] + *t1 [half]
+    ##t0++
+    ##t1--
+    ##t2++
+    
+    beq a0, a1, fin
+    mv t0, a0
+    mv t1, a1
+    addi t1, t1, -2
+    mv t2, a1
+    
+    _cicloReduccion:
+        lh t3, 0(t0)
+        lh t4, 0(t1)
+        add t3, t3, t4
+        sw t3, 0(t2)
+        addi t0, t0, 2
+        addi t1, t1, -2
+        addi t2, t2, 4
+        blt t0, t1, _cicloReduccion
+        ret
+    
+imprimirVector:
+    mv t0, a1
+    mv t1, a2
+    beq t1, zero, fin
+    li a7, 99
+    li t4, 99
+    _cicloImprimir:
+        lw t2, 0(t0)
+        j _printNum
+        _L0:
+        addi t0, t0, 4
+        addi t1, t1, -1
+        blt zero, t1, _cicloImprimir
+        ret
+        
+    _printNum:
+        beq a7, t4, _primerNum
+        li a7, 11
+        li a0, 124
+        ecall
+        _primerNum:
+        li a7, 1
+        mv a0, t2
+        ecall
+        j _L0
+    
+
+*******************************************************************************
+
+.data    
+    vector: .half 4, -8, -16, -32, 64, -128, 0
+
+.text
+    la a0, vector
+    jal ra, negativos
+    fin:
+    li a7, 10
+    ecall
+    
+negativos:
+    #t0 = a0
+    #a0 = 0
+    #while(*t0 != 0)
+    ##a0++
+    ##t0++
+    #print(a0)
+    
+    mv t0, a0
+    li a0, 0
+    li a7, 1
+    
+    _ciclo:
+        lh t1, 0(t0)
+        blt t1, zero, _contar
+        _L0:
+        addi t0, t0, 2
+        bne t1, zero, _ciclo
+        ecall
+        ret
+        
+    _contar:
+        addi a0, a0, 1
+        j _L0
+
+*******************************************************************************
+
+.data
+    vector: .string "Muy Buenas Tardes"
+    
+.text
+    la a0, vector
+    jal ra, toUpper
+    jal ra, puts
+    fin:
+    li a7, 10
+    ecall
+    
+# t0 >= 97 && t0 <= 122
+# t0 < 97 || t0 > 122
+    
+toUpper:
+    mv t0, a0
+    li t2, 97
+    li t3, 122
+    _ciclo:
+        lbu t1, 0(t0)
+        blt t1, t2, _L0
+        blt t3, t1, _L0
+        addi t1, t1, -32
+        sb t1, 0(t0)
+        _L0:
+        addi t0, t0, 1
+        bne t1, zero, _ciclo
+        ret
+        
+puts:
+    li a7, 4
+    ecall
+    ret
+
+*******************************************************************************
+
+.data
+    cadena: .string "YVAN EHT NIOJ"
+    
+.text
+    la a0, cadena
+    jal ra, invertir
+    la a0, cadena
+    jal ra, imprimir
+    fin:
+    li a7, 10
+    ecall
+    
+strlen:
+    mv t2, a0
+    li a0, 0
+    _cicloStrlen:
+        lbu t3, 0(t2)
+        addi a0, a0, 1
+        addi t2, t2, 1
+        bne t3, zero, _cicloStrlen
+        ret
+    
+    
+invertir:
+    #while(t0 <= t1)
+    ##*(t0++) = *(t1++)
+    
+    mv t0, a0
+    mv t1, a0
+    
+    sw ra, 0(sp)
+    addi sp, sp, -4
+    
+    jal ra, strlen
+    
+    add t1, t1, a0
+    addi t1, t1, -2
+    
+    _cicloInvertir:
+        lbu t2, 0(t0)
+        lbu t3, 0(t1)
+        sb t2, 0(t1)
+        sb t3, 0(t0)
+        addi t0, t0, 1
+        addi t1, t1, -1
+        bge t1, t0, _cicloInvertir
+        addi sp, sp, 4
+        lw ra, 0(sp)
+        ret 
+        
+imprimir:
+    li a7, 4
+    ecall
+    ret
+
+*******************************************************************************
+
+.data
+    vector: .word 4, 8, 16, 32, 64, 128, 0
+    
+.text
+    la a0, vector
+    jal ra, multiplicar
+    fin:
+    li a7, 10
+    ecall
+    
+multiplicar:
+    #while(*t0 != 0)
+    ##*t0 << 1
+    ##t0++
+    ##print *t0
+    
+    mv t0, a0
+    li a7, 99
+    li t6, 99
+    
+    _ciclo:
+        lw t1, 0(t0)
+        slli t1, t1, 1
+        bne t1, zero, _mostrarNum
+        _L0:
+        addi t0, t0, 4
+        bne t1, zero, _ciclo
+        ret
+        
+    _mostrarNum:
+        beq a7, t6, _primerNum
+        li a7, 11
+        li a0, 32
+        ecall
+        _primerNum:
+        li a7, 1
+        mv a0, t1
+        ecall
+        j _L0
+
+*******************************************************************************
